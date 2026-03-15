@@ -16,12 +16,10 @@
         extend: {
           colors: {
             navy: '#0B1225',
-            'navy-light': '#131D3B',
-            'navy-card': '#162040',
+            'navy-light': '#0F172A',
+            'navy-card': '#1A2340',
             cyan: '#22B8CF',
             'cyan-light': '#3DD8E8',
-            'blue-accent': '#0369A1',
-            slate: { 50: '#F8FAFC', 100: '#F1F5F9', 200: '#E2E8F0', 300: '#CBD5E1', 400: '#94A3B8', 500: '#64748B', 600: '#475569', 700: '#334155', 800: '#1E293B', 900: '#0F172A', 950: '#020617' },
           },
           fontFamily: {
             heading: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
@@ -37,36 +35,62 @@
     }
     .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
-    .gradient-text { background: linear-gradient(135deg, #22B8CF 0%, #0369A1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glow { box-shadow: 0 0 40px rgba(34, 184, 207, 0.15); }
-    .card-hover { transition: transform 0.25s ease, box-shadow 0.25s ease; }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(34, 184, 207, 0.12); }
-    .hero-grid { background-image: radial-gradient(circle at 1px 1px, rgba(34,184,207,0.08) 1px, transparent 0); background-size: 40px 40px; }
+    .gradient-text { background: linear-gradient(135deg, #22B8CF, #0369A1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glow { box-shadow: 0 0 40px rgba(34,184,207,0.15); }
+
+    /* Marquee */
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .marquee-track { display: flex; width: max-content; animation: marquee 25s linear infinite; }
+    .marquee-track:hover { animation-play-state: paused; }
+
+    /* Cards */
+    .card-hover { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(34,184,207,0.1); border-color: rgba(34,184,207,0.2); }
+
+    /* Testimonial scroll */
+    @keyframes scroll-left  { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+    .scroll-left  { animation: scroll-left  40s linear infinite; }
+    .scroll-right { animation: scroll-right 40s linear infinite; }
+    .scroll-left:hover, .scroll-right:hover { animation-play-state: paused; }
+
+    /* FAQ */
+    details summary { cursor: pointer; list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary .faq-icon { transition: transform 0.2s ease; }
+    details[open] summary .faq-icon { transform: rotate(45deg); }
+    details .faq-body { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Counter animation */
+    .counter { display: inline-block; }
   </style>
 </head>
-<body class="bg-navy text-slate-200 font-body antialiased">
+<body class="bg-black text-slate-200 font-body antialiased">
 
   <!-- ========== NAV ========== -->
-  <nav id="nav" class="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 bg-navy/80 backdrop-blur-lg border-b border-white/5">
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/5">
     <div class="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
       <a href="#" class="flex items-center gap-3 cursor-pointer">
-        <img src="logo.png" alt="PoJun Labs Logo" class="h-9 w-9 rounded-lg" />
-        <span class="font-heading font-bold text-xl text-white tracking-tight">PoJun Labs</span>
+        <img src="logo.png" alt="PoJun Labs Logo" class="h-8 w-8 rounded-lg" />
+        <span class="font-heading font-bold text-lg text-white tracking-tight">PoJun Labs</span>
       </a>
       <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <a href="#services" class="text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer">服务</a>
-        <a href="#why" class="text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer">优势</a>
-        <a href="#contact" class="text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer">联系</a>
+        <a href="#services" class="text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">服务</a>
+        <a href="#testimonials" class="text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">口碑</a>
+        <a href="#faq" class="text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">常见问题</a>
+        <a href="#contact" class="text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">联系</a>
       </div>
-      <button id="menu-btn" class="md:hidden text-slate-300 hover:text-cyan cursor-pointer" aria-label="Toggle menu">
+      <button id="menu-btn" class="md:hidden text-slate-300 hover:text-white cursor-pointer" aria-label="Toggle menu">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
     </div>
-    <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-navy/95 backdrop-blur-lg">
+    <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-black/95 backdrop-blur-xl">
       <div class="flex flex-col gap-1 px-6 py-4 text-sm font-medium">
-        <a href="#services" class="py-2 text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer">服务</a>
-        <a href="#why" class="py-2 text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer">优势</a>
-        <a href="#contact" class="py-2 text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer">联系</a>
+        <a href="#services" class="py-2 text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">服务</a>
+        <a href="#testimonials" class="py-2 text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">口碑</a>
+        <a href="#faq" class="py-2 text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">常见问题</a>
+        <a href="#contact" class="py-2 text-slate-400 hover:text-white transition-colors duration-200 cursor-pointer">联系</a>
       </div>
     </div>
   </nav>
@@ -75,11 +99,10 @@
   <section id="hero-section" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-black">
     <canvas id="particle-canvas" class="absolute inset-0 w-full h-full"></canvas>
     <canvas id="text-particles" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index:5"></canvas>
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy-light/80 pointer-events-none" style="z-index:6"></div>
 
     <div class="relative max-w-4xl mx-auto px-6 text-center" style="z-index:10">
       <div class="hero-el mb-8" style="opacity:0;transform:translateY(16px)">
-        <img src="logo.png" alt="PoJun Labs" class="w-24 h-24 mx-auto rounded-2xl glow" />
+        <img src="logo.png" alt="PoJun Labs" class="w-20 h-20 mx-auto rounded-2xl glow" />
       </div>
       <h1 id="hero-title" class="font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-tight tracking-tight mb-6" aria-label="技术破局，智造未来" style="opacity:0;height:0;overflow:hidden;margin:0;padding:0;pointer-events:none;position:absolute">
         技术破局，<span class="gradient-text">智造未来</span>
@@ -89,13 +112,12 @@
         专注计算机论文、软件开发与 AI 智能体——用技术为您解决核心难题
       </p>
       <div class="hero-el flex flex-col sm:flex-row gap-4 justify-center" style="opacity:0;transform:translateY(16px)">
-        <a href="#contact" class="inline-flex items-center justify-center gap-2 bg-cyan hover:bg-cyan-light text-navy font-semibold px-8 py-3.5 rounded-xl transition-colors duration-200 cursor-pointer text-base">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        <a href="#contact" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-black font-semibold px-8 py-3.5 rounded-full transition-colors duration-200 cursor-pointer text-sm">
           立即咨询
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </a>
-        <a href="#services" class="inline-flex items-center justify-center gap-2 border border-slate-600 hover:border-cyan/50 text-slate-300 hover:text-white px-8 py-3.5 rounded-xl transition-all duration-200 cursor-pointer text-base">
-          了解服务
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        <a href="#services" class="inline-flex items-center justify-center gap-2 border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white px-8 py-3.5 rounded-full transition-all duration-200 cursor-pointer text-sm">
+          了解更多
         </a>
       </div>
     </div>
@@ -105,87 +127,101 @@
     </div>
   </section>
 
+  <!-- ========== TECH MARQUEE ========== -->
+  <section class="relative border-y border-white/5 bg-black py-6 overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6 mb-4">
+      <p class="text-xs text-slate-500 tracking-widest uppercase text-center">We Work With</p>
+    </div>
+    <div class="relative overflow-hidden">
+      <div class="marquee-track gap-12 items-center">
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Java</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Python</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Spring Boot</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">React</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Vue.js</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Node.js</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">MySQL</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">LangChain</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">OpenAI</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Claude</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">RAG</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">微信小程序</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Java</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Python</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Spring Boot</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">React</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Vue.js</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Node.js</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">MySQL</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">LangChain</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">OpenAI</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">Claude</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">RAG</span>
+        <span class="text-slate-500 font-heading font-semibold text-sm whitespace-nowrap px-6">微信小程序</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ========== SERVICES ========== -->
-  <section id="services" class="relative py-24 sm:py-32 bg-navy-light">
+  <section id="services" class="relative py-24 sm:py-32 bg-black">
     <div class="max-w-6xl mx-auto px-6">
       <div class="text-center mb-16 fade-up">
-        <p class="text-cyan font-semibold text-sm tracking-widest uppercase mb-3">Our Services</p>
-        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white">核心服务</h2>
+        <p class="text-cyan font-semibold text-xs tracking-widest uppercase mb-4">All you need is one message</p>
+        <h2 class="font-heading font-bold text-3xl sm:text-4xl md:text-5xl text-white">一站式技术服务</h2>
       </div>
-      <div class="grid md:grid-cols-3 gap-8">
+      <div class="grid md:grid-cols-3 gap-6">
 
-        <!-- Card 1 -->
-        <div class="fade-up bg-navy-card border border-white/5 rounded-2xl p-8 card-hover cursor-pointer">
-          <div class="w-12 h-12 rounded-xl bg-cyan/10 flex items-center justify-center mb-6">
+        <div class="fade-up bg-navy-card/50 border border-white/5 rounded-2xl p-8 card-hover cursor-pointer group">
+          <div class="w-12 h-12 rounded-xl bg-cyan/10 flex items-center justify-center mb-6 group-hover:bg-cyan/20 transition-colors duration-200">
             <svg class="w-6 h-6 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
           </div>
           <h3 class="font-heading font-semibold text-xl text-white mb-3">本科计算机论文</h3>
-          <p class="text-slate-400 leading-relaxed text-sm">涵盖 Java、Python、Web 全栈等主流方向，从选题、开题到答辩全流程支持，代码可运行、查重率达标。</p>
+          <p class="text-slate-400 leading-relaxed text-sm mb-4">涵盖 Java、Python、Web 全栈等主流方向，从选题、开题到答辩全流程支持，代码可运行、查重率达标。</p>
+          <span class="text-cyan text-xs font-semibold tracking-wide uppercase">选题 · 开题 · 代码 · 论文 · 答辩</span>
         </div>
 
-        <!-- Card 2 -->
-        <div class="fade-up bg-navy-card border border-white/5 rounded-2xl p-8 card-hover cursor-pointer">
-          <div class="w-12 h-12 rounded-xl bg-cyan/10 flex items-center justify-center mb-6">
+        <div class="fade-up bg-navy-card/50 border border-white/5 rounded-2xl p-8 card-hover cursor-pointer group">
+          <div class="w-12 h-12 rounded-xl bg-cyan/10 flex items-center justify-center mb-6 group-hover:bg-cyan/20 transition-colors duration-200">
             <svg class="w-6 h-6 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
           </div>
           <h3 class="font-heading font-semibold text-xl text-white mb-3">软件开发</h3>
-          <p class="text-slate-400 leading-relaxed text-sm">Web 应用、小程序、企业后台管理系统等定制开发，技术栈灵活，交付快速，售后无忧。</p>
+          <p class="text-slate-400 leading-relaxed text-sm mb-4">Web 应用、小程序、企业后台管理系统等定制开发，技术栈灵活，交付快速，售后无忧。</p>
+          <span class="text-cyan text-xs font-semibold tracking-wide uppercase">Web · 小程序 · 后台 · API · 部署</span>
         </div>
 
-        <!-- Card 3 -->
-        <div class="fade-up bg-navy-card border border-white/5 rounded-2xl p-8 card-hover cursor-pointer">
-          <div class="w-12 h-12 rounded-xl bg-cyan/10 flex items-center justify-center mb-6">
+        <div class="fade-up bg-navy-card/50 border border-white/5 rounded-2xl p-8 card-hover cursor-pointer group">
+          <div class="w-12 h-12 rounded-xl bg-cyan/10 flex items-center justify-center mb-6 group-hover:bg-cyan/20 transition-colors duration-200">
             <svg class="w-6 h-6 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg>
           </div>
           <h3 class="font-heading font-semibold text-xl text-white mb-3">AI 智能体开发</h3>
-          <p class="text-slate-400 leading-relaxed text-sm">基于大语言模型的智能体定制，包括 RAG 知识库、自动化工作流、Agent 工具链集成，赋能业务智能化。</p>
+          <p class="text-slate-400 leading-relaxed text-sm mb-4">基于大语言模型的智能体定制，包括 RAG 知识库、自动化工作流、Agent 工具链集成，赋能业务智能化。</p>
+          <span class="text-cyan text-xs font-semibold tracking-wide uppercase">RAG · Agent · 工作流 · MCP · 私有化</span>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- ========== WHY US ========== -->
-  <section id="why" class="relative py-24 sm:py-32 bg-navy">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center mb-16 fade-up">
-        <p class="text-cyan font-semibold text-sm tracking-widest uppercase mb-3">Why Us</p>
-        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white">为什么选择破军</h2>
-      </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-        <div class="fade-up text-center p-6">
-          <div class="w-14 h-14 rounded-2xl bg-cyan/10 flex items-center justify-center mx-auto mb-5">
-            <svg class="w-7 h-7 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
-          </div>
-          <h3 class="font-heading font-semibold text-lg text-white mb-2">品质保障</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">严格质检流程，交付物经过多轮审核，确保代码可运行、论文查重达标</p>
+  <!-- ========== STATS ========== -->
+  <section class="relative py-16 bg-black border-y border-white/5">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="fade-up">
+          <p class="font-heading font-bold text-3xl sm:text-4xl text-white mb-1">200<span class="text-cyan">+</span></p>
+          <p class="text-slate-500 text-sm">已完成项目</p>
         </div>
-
-        <div class="fade-up text-center p-6">
-          <div class="w-14 h-14 rounded-2xl bg-cyan/10 flex items-center justify-center mx-auto mb-5">
-            <svg class="w-7 h-7 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          </div>
-          <h3 class="font-heading font-semibold text-lg text-white mb-2">准时交付</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">明确时间节点，阶段性交付进度透明，绝不拖延</p>
+        <div class="fade-up">
+          <p class="font-heading font-bold text-3xl sm:text-4xl text-white mb-1">98<span class="text-cyan">%</span></p>
+          <p class="text-slate-500 text-sm">客户满意度</p>
         </div>
-
-        <div class="fade-up text-center p-6">
-          <div class="w-14 h-14 rounded-2xl bg-cyan/10 flex items-center justify-center mx-auto mb-5">
-            <svg class="w-7 h-7 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/></svg>
-          </div>
-          <h3 class="font-heading font-semibold text-lg text-white mb-2">全程沟通</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">一对一专属对接，需求理解精准，修改响应迅速</p>
+        <div class="fade-up">
+          <p class="font-heading font-bold text-3xl sm:text-4xl text-white mb-1">3<span class="text-cyan">年</span></p>
+          <p class="text-slate-500 text-sm">行业经验</p>
         </div>
-
-        <div class="fade-up text-center p-6">
-          <div class="w-14 h-14 rounded-2xl bg-cyan/10 flex items-center justify-center mx-auto mb-5">
-            <svg class="w-7 h-7 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-          </div>
-          <h3 class="font-heading font-semibold text-lg text-white mb-2">隐私安全</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">严格保密协议，所有项目资料加密存储，保护客户隐私</p>
+        <div class="fade-up">
+          <p class="font-heading font-bold text-3xl sm:text-4xl text-white mb-1">24h</p>
+          <p class="text-slate-500 text-sm">快速响应</p>
         </div>
-
       </div>
     </div>
   </section>
@@ -194,57 +230,144 @@
   <section class="relative py-24 sm:py-32 bg-navy-light">
     <div class="max-w-4xl mx-auto px-6">
       <div class="text-center mb-16 fade-up">
-        <p class="text-cyan font-semibold text-sm tracking-widest uppercase mb-3">Process</p>
-        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white">合作流程</h2>
+        <p class="text-cyan font-semibold text-xs tracking-widest uppercase mb-4">How it works</p>
+        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white">四步搞定</h2>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-
         <div class="fade-up relative text-center">
-          <div class="w-10 h-10 rounded-full bg-cyan text-navy font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">1</div>
-          <h3 class="font-heading font-semibold text-white mb-1">需求沟通</h3>
-          <p class="text-slate-400 text-sm">详细了解您的需求与deadline</p>
+          <div class="w-12 h-12 rounded-full bg-white text-black font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">1</div>
+          <h3 class="font-heading font-semibold text-white mb-2">需求沟通</h3>
+          <p class="text-slate-400 text-sm">详细了解您的需求、时间节点和预算</p>
         </div>
-
         <div class="fade-up relative text-center">
-          <div class="w-10 h-10 rounded-full bg-cyan text-navy font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">2</div>
-          <h3 class="font-heading font-semibold text-white mb-1">方案报价</h3>
-          <p class="text-slate-400 text-sm">制定方案并给出透明报价</p>
+          <div class="w-12 h-12 rounded-full bg-white text-black font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">2</div>
+          <h3 class="font-heading font-semibold text-white mb-2">方案报价</h3>
+          <p class="text-slate-400 text-sm">制定技术方案，给出透明合理的报价</p>
         </div>
-
         <div class="fade-up relative text-center">
-          <div class="w-10 h-10 rounded-full bg-cyan text-navy font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">3</div>
-          <h3 class="font-heading font-semibold text-white mb-1">开发交付</h3>
-          <p class="text-slate-400 text-sm">阶段性交付，进度实时可查</p>
+          <div class="w-12 h-12 rounded-full bg-white text-black font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">3</div>
+          <h3 class="font-heading font-semibold text-white mb-2">开发交付</h3>
+          <p class="text-slate-400 text-sm">阶段性交付，进度实时同步</p>
         </div>
-
         <div class="fade-up relative text-center">
-          <div class="w-10 h-10 rounded-full bg-cyan text-navy font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">4</div>
-          <h3 class="font-heading font-semibold text-white mb-1">售后支持</h3>
-          <p class="text-slate-400 text-sm">免费修改至满意为止</p>
+          <div class="w-12 h-12 rounded-full bg-white text-black font-heading font-bold flex items-center justify-center mx-auto mb-4 text-lg">4</div>
+          <h3 class="font-heading font-semibold text-white mb-2">售后支持</h3>
+          <p class="text-slate-400 text-sm">免费修改至满意，长期技术支持</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TESTIMONIALS ========== -->
+  <section id="testimonials" class="relative py-24 sm:py-32 bg-black overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-cyan font-semibold text-xs tracking-widest uppercase mb-4">What clients say</p>
+        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white">客户怎么说</h2>
+        <p class="text-slate-400 mt-3 text-sm">来自高校、企业等不同背景的真实反馈</p>
+      </div>
+    </div>
+
+    <div class="overflow-hidden mb-6">
+      <div class="scroll-left flex gap-6 w-max">
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"从选题到答辩一路帮到底，代码能跑，论文查重也过了。救命恩人！"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">王</div><div><p class="text-white text-xs font-medium">王同学</p><p class="text-slate-500 text-xs">本科 · 计算机科学</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">软件开发</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"小程序上线一周就稳定运行，接口文档也很清晰，后续维护完全没压力。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">李</div><div><p class="text-white text-xs font-medium">李经理</p><p class="text-slate-500 text-xs">产品经理 · 电商公司</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">AI 智能体</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"帮我搭了个客服 AI Agent，接入企业知识库后，客户问题响应效率提升了 5 倍。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">陈</div><div><p class="text-white text-xs font-medium">陈总</p><p class="text-slate-500 text-xs">CEO · 服务企业</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"沟通非常专业，需求理解很到位，交付比预期还快。推荐给室友了！"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">张</div><div><p class="text-white text-xs font-medium">张同学</p><p class="text-slate-500 text-xs">本科 · 软件工程</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">软件开发</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"后台管理系统功能完善，UI 也很美观。团队响应速度很快，修改也及时。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">赵</div><div><p class="text-white text-xs font-medium">赵工</p><p class="text-slate-500 text-xs">技术负责人 · 互联网公司</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">AI 智能体</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"RAG 知识库的效果超预期，检索准确率很高，比我们之前自己搞的好太多。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">刘</div><div><p class="text-white text-xs font-medium">刘博士</p><p class="text-slate-500 text-xs">研发总监 · 科技公司</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"从选题到答辩一路帮到底，代码能跑，论文查重也过了。救命恩人！"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">王</div><div><p class="text-white text-xs font-medium">王同学</p><p class="text-slate-500 text-xs">本科 · 计算机科学</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">软件开发</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"小程序上线一周就稳定运行，接口文档也很清晰，后续维护完全没压力。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">李</div><div><p class="text-white text-xs font-medium">李经理</p><p class="text-slate-500 text-xs">产品经理 · 电商公司</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">AI 智能体</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"帮我搭了个客服 AI Agent，接入企业知识库后，客户问题响应效率提升了 5 倍。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">陈</div><div><p class="text-white text-xs font-medium">陈总</p><p class="text-slate-500 text-xs">CEO · 服务企业</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"沟通非常专业，需求理解很到位，交付比预期还快。推荐给室友了！"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">张</div><div><p class="text-white text-xs font-medium">张同学</p><p class="text-slate-500 text-xs">本科 · 软件工程</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">软件开发</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"后台管理系统功能完善，UI 也很美观。团队响应速度很快，修改也及时。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">赵</div><div><p class="text-white text-xs font-medium">赵工</p><p class="text-slate-500 text-xs">技术负责人 · 互联网公司</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">AI 智能体</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"RAG 知识库的效果超预期，检索准确率很高，比我们之前自己搞的好太多。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">刘</div><div><p class="text-white text-xs font-medium">刘博士</p><p class="text-slate-500 text-xs">研发总监 · 科技公司</p></div></div></div>
+      </div>
+    </div>
+    <div class="overflow-hidden">
+      <div class="scroll-right flex gap-6 w-max">
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"Python 爬虫+数据分析的毕设，一周就交了初稿，效率太高了。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">孙</div><div><p class="text-white text-xs font-medium">孙同学</p><p class="text-slate-500 text-xs">本科 · 数据科学</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">软件开发</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"从零到上线只用了两周，代码质量很高，注释和文档也齐全。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">周</div><div><p class="text-white text-xs font-medium">周总</p><p class="text-slate-500 text-xs">创始人 · 初创企业</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">AI 智能体</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"自动化工作流接入后，团队的重复性工作减少了 60%，非常值。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">吴</div><div><p class="text-white text-xs font-medium">吴总监</p><p class="text-slate-500 text-xs">运营总监 · 教育公司</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"答辩老师都夸了，说系统设计很合理，代码架构也很清晰。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">黄</div><div><p class="text-white text-xs font-medium">黄同学</p><p class="text-slate-500 text-xs">本科 · 信息管理</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"Python 爬虫+数据分析的毕设，一周就交了初稿，效率太高了。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">孙</div><div><p class="text-white text-xs font-medium">孙同学</p><p class="text-slate-500 text-xs">本科 · 数据科学</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">软件开发</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"从零到上线只用了两周，代码质量很高，注释和文档也齐全。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">周</div><div><p class="text-white text-xs font-medium">周总</p><p class="text-slate-500 text-xs">创始人 · 初创企业</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">AI 智能体</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"自动化工作流接入后，团队的重复性工作减少了 60%，非常值。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">吴</div><div><p class="text-white text-xs font-medium">吴总监</p><p class="text-slate-500 text-xs">运营总监 · 教育公司</p></div></div></div>
+        <div class="w-80 flex-shrink-0 bg-navy-card/50 border border-white/5 rounded-2xl p-6"><p class="text-xs text-cyan mb-3 font-semibold">毕业论文</p><p class="text-slate-300 text-sm leading-relaxed mb-4">"答辩老师都夸了，说系统设计很合理，代码架构也很清晰。"</p><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan/20 flex items-center justify-center text-cyan text-xs font-bold">黄</div><div><p class="text-white text-xs font-medium">黄同学</p><p class="text-slate-500 text-xs">本科 · 信息管理</p></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FAQ ========== -->
+  <section id="faq" class="relative py-24 sm:py-32 bg-navy-light">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-cyan font-semibold text-xs tracking-widest uppercase mb-4">FAQ</p>
+        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white">你可能想问</h2>
+      </div>
+      <div class="space-y-4 fade-up">
+
+        <details class="bg-navy-card/30 border border-white/5 rounded-xl overflow-hidden group">
+          <summary class="flex items-center justify-between px-6 py-5 text-white font-medium text-sm">
+            论文代写包括哪些服务？
+            <span class="faq-icon text-slate-400 text-xl leading-none">+</span>
+          </summary>
+          <div class="faq-body px-6 pb-5 text-slate-400 text-sm leading-relaxed">包括选题建议、开题报告、系统设计、代码实现（保证可运行）、论文撰写、查重降重、答辩 PPT 和答辩辅导。全流程一对一对接，修改到满意为止。</div>
+        </details>
+
+        <details class="bg-navy-card/30 border border-white/5 rounded-xl overflow-hidden group">
+          <summary class="flex items-center justify-between px-6 py-5 text-white font-medium text-sm">
+            交付周期一般多久？
+            <span class="faq-icon text-slate-400 text-xl leading-none">+</span>
+          </summary>
+          <div class="faq-body px-6 pb-5 text-slate-400 text-sm leading-relaxed">论文类项目通常 1-3 周，软件开发根据复杂度 1-4 周，AI 智能体项目 1-2 周。紧急项目可加急处理，具体时间沟通后确认。</div>
+        </details>
+
+        <details class="bg-navy-card/30 border border-white/5 rounded-xl overflow-hidden group">
+          <summary class="flex items-center justify-between px-6 py-5 text-white font-medium text-sm">
+            如何保证论文查重率？
+            <span class="faq-icon text-slate-400 text-xl leading-none">+</span>
+          </summary>
+          <div class="faq-body px-6 pb-5 text-slate-400 text-sm leading-relaxed">所有论文交付前都会通过主流查重系统检测，确保查重率符合学校要求。如不达标免费修改，直到通过为止。</div>
+        </details>
+
+        <details class="bg-navy-card/30 border border-white/5 rounded-xl overflow-hidden group">
+          <summary class="flex items-center justify-between px-6 py-5 text-white font-medium text-sm">
+            售后怎么保障？
+            <span class="faq-icon text-slate-400 text-xl leading-none">+</span>
+          </summary>
+          <div class="faq-body px-6 pb-5 text-slate-400 text-sm leading-relaxed">所有项目提供免费售后修改服务，论文类支持到答辩结束，软件类提供 3 个月 Bug 修复保障。沟通全程留痕，有问题随时找我们。</div>
+        </details>
+
+        <details class="bg-navy-card/30 border border-white/5 rounded-xl overflow-hidden group">
+          <summary class="flex items-center justify-between px-6 py-5 text-white font-medium text-sm">
+            隐私安全怎么保障？
+            <span class="faq-icon text-slate-400 text-xl leading-none">+</span>
+          </summary>
+          <div class="faq-body px-6 pb-5 text-slate-400 text-sm leading-relaxed">严格保密协议，所有项目资料加密存储，完成后可按要求删除。绝不二次使用或泄露任何客户信息。</div>
+        </details>
 
       </div>
     </div>
   </section>
 
-  <!-- ========== CONTACT / CTA ========== -->
-  <section id="contact" class="relative py-24 sm:py-32 bg-navy overflow-hidden">
+  <!-- ========== CTA + CONTACT ========== -->
+  <section id="contact" class="relative py-24 sm:py-32 bg-black overflow-hidden">
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan/5 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="relative max-w-3xl mx-auto px-6 text-center">
-      <div class="fade-up">
-        <p class="text-cyan font-semibold text-sm tracking-widest uppercase mb-3">Contact</p>
-        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white mb-4">准备好了吗？</h2>
-        <p class="text-slate-400 text-lg mb-10 leading-relaxed">无论是毕业论文还是技术项目，我们随时为您提供专业支持</p>
+      <div class="fade-up mb-12">
+        <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white mb-4">准备好开始了吗？</h2>
+        <p class="text-slate-400 text-lg leading-relaxed">无论是毕业论文还是技术项目，发一条消息就能启动</p>
       </div>
-      <div class="fade-up bg-navy-card border border-white/5 rounded-2xl p-8 sm:p-10 glow">
-        <div class="grid sm:grid-cols-3 gap-8 text-left">
+      <div class="fade-up bg-navy-card/40 border border-white/5 rounded-2xl p-8 sm:p-10">
+        <div class="grid sm:grid-cols-3 gap-8 text-left mb-8">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 rounded-xl bg-cyan/10 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg class="w-5 h-5 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
             </div>
             <div>
-              <p class="text-white font-semibold mb-1">邮箱</p>
-              <a href="mailto:pojunit1@outlook.com" class="text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer text-sm">pojunit1@outlook.com</a>
+              <p class="text-white font-semibold text-sm mb-1">邮箱</p>
+              <a href="mailto:pojunit1@outlook.com" class="text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer text-xs">pojunit1@outlook.com</a>
             </div>
           </div>
           <div class="flex items-start gap-4">
@@ -252,8 +375,8 @@
               <svg class="w-5 h-5 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             </div>
             <div>
-              <p class="text-white font-semibold mb-1">微信</p>
-              <p class="text-slate-400 text-sm">添加微信: <span class="text-cyan">aiqzsthl</span></p>
+              <p class="text-white font-semibold text-sm mb-1">微信</p>
+              <p class="text-slate-400 text-xs">添加微信: <span class="text-cyan">aiqzsthl</span></p>
             </div>
           </div>
           <div class="flex items-start gap-4">
@@ -261,15 +384,15 @@
               <svg class="w-5 h-5 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
             </div>
             <div>
-              <p class="text-white font-semibold mb-1">电话</p>
-              <a href="tel:13543013164" class="text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer text-sm">135-4301-3164</a>
+              <p class="text-white font-semibold text-sm mb-1">电话</p>
+              <a href="tel:13543013164" class="text-slate-400 hover:text-cyan transition-colors duration-200 cursor-pointer text-xs">135-4301-3164</a>
             </div>
           </div>
         </div>
-        <div class="mt-8 pt-8 border-t border-white/5 text-center">
-          <a href="mailto:pojunit1@outlook.com" class="inline-flex items-center justify-center gap-2 bg-cyan hover:bg-cyan-light text-navy font-semibold px-8 py-3.5 rounded-xl transition-colors duration-200 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-            发送邮件
+        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-6 border-t border-white/5">
+          <a href="mailto:pojunit1@outlook.com" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-black font-semibold px-8 py-3.5 rounded-full transition-colors duration-200 cursor-pointer text-sm">
+            联系我们
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
           </a>
         </div>
       </div>
@@ -277,14 +400,20 @@
   </section>
 
   <!-- ========== FOOTER ========== -->
-  <footer class="bg-navy-light border-t border-white/5 py-10">
+  <footer class="bg-black border-t border-white/5 py-10">
     <div class="max-w-6xl mx-auto px-6">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
         <div class="flex items-center gap-3">
           <img src="logo.png" alt="PoJun Labs" class="h-7 w-7 rounded-lg" />
-          <span class="font-heading font-semibold text-white">PoJun Labs</span>
+          <span class="font-heading font-semibold text-white text-sm">PoJun Labs</span>
         </div>
-        <p class="text-slate-500 text-sm">&copy; 2026 PoJun Labs. All rights reserved.</p>
+        <div class="flex items-center gap-6 text-xs text-slate-500">
+          <a href="#services" class="hover:text-slate-300 transition-colors cursor-pointer">服务</a>
+          <a href="#testimonials" class="hover:text-slate-300 transition-colors cursor-pointer">口碑</a>
+          <a href="#faq" class="hover:text-slate-300 transition-colors cursor-pointer">FAQ</a>
+          <a href="#contact" class="hover:text-slate-300 transition-colors cursor-pointer">联系</a>
+        </div>
+        <p class="text-slate-600 text-xs">&copy; 2026 PoJun Labs. All rights reserved.</p>
       </div>
     </div>
   </footer>
@@ -438,25 +567,16 @@
           for (let px = 0; px < ow * dpr; px += gap) {
             const i = (py * ow * dpr + px) * 4;
             if (data[i + 3] > 100) {
-              targets.push({
-                tx: px / dpr,
-                ty: py / dpr,
-                cr: data[i], cg: data[i+1], cb: data[i+2], ca: data[i+3] / 255
-              });
+              targets.push({ tx: px / dpr, ty: py / dpr, cr: data[i], cg: data[i+1], cb: data[i+2], ca: data[i+3] / 255 });
             }
           }
         }
 
-        if (targets.length > 4000) {
-          targets.sort(() => Math.random() - 0.5);
-          targets.length = 4000;
-        }
+        if (targets.length > 4000) { targets.sort(() => Math.random() - 0.5); targets.length = 4000; }
 
         const spacer = document.getElementById('hero-title-spacer');
         spacer.style.height = oh + 'px';
 
-        const heroContent = section.querySelector('.relative.max-w-4xl');
-        const heroRect = heroContent.getBoundingClientRect();
         const sectionRect = section.getBoundingClientRect();
         const spacerRect = spacer.getBoundingClientRect();
         const offsetY = spacerRect.top - sectionRect.top;
@@ -467,27 +587,22 @@
           return {
             x: t.tx + Math.cos(angle) * dist,
             y: (t.ty + offsetY) + Math.sin(angle) * dist,
-            tx: t.tx,
-            ty: t.ty + offsetY,
+            tx: t.tx, ty: t.ty + offsetY,
             cr: t.cr, cg: t.cg, cb: t.cb, ca: t.ca,
             size: (1 + Math.random() * 0.8) / dpr * 1.5,
-            delay: Math.random() * 0.6,
-            phase: Math.random() * 6.28,
+            delay: Math.random() * 0.6, phase: Math.random() * 6.28,
           };
         });
       }
 
       const DURATION = 2.2;
-
       function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
 
       function revealHeroEls() {
-        const els = document.querySelectorAll('.hero-el');
-        els.forEach((el, i) => {
+        document.querySelectorAll('.hero-el').forEach((el, i) => {
           setTimeout(() => {
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            el.style.opacity = '1';
-            el.style.transform = 'translateY(0)';
+            el.style.opacity = '1'; el.style.transform = 'translateY(0)';
           }, i * 200);
         });
       }
@@ -499,56 +614,36 @@
         frame++;
         const elapsed = (now - startTime) / 1000;
         ctx.clearRect(0, 0, sw, sh);
-
         let allDone = true;
 
         for (const p of textParts) {
           const t = Math.max(0, Math.min(1, (elapsed - p.delay) / DURATION));
           if (t < 1) allDone = false;
           const e = easeOutQuart(t);
-
           const cx = p.x + (p.tx - p.x) * e;
           const cy = p.y + (p.ty - p.y) * e;
-
           const breathe = allDone ? Math.sin(frame * 0.04 + p.phase) * 0.6 : 0;
           const fx = cx + breathe;
           const fy = cy + Math.cos(frame * 0.03 + p.phase) * breathe * 0.5;
-
           const alpha = p.ca * (0.2 + e * 0.8);
           ctx.fillStyle = `rgba(${p.cr},${p.cg},${p.cb},${alpha})`;
           ctx.fillRect(fx - p.size * 0.5, fy - p.size * 0.5, p.size, p.size);
-
           if (!allDone && t > 0 && t < 0.95) {
             ctx.fillStyle = `rgba(${p.cr},${p.cg},${p.cb},${alpha * 0.15})`;
             ctx.fillRect(fx - p.size, fy - p.size, p.size * 2, p.size * 2);
           }
         }
 
-        if (!revealed && elapsed > DURATION * 0.7) {
-          revealed = true;
-          revealHeroEls();
-        }
-
+        if (!revealed && elapsed > DURATION * 0.7) { revealed = true; revealHeroEls(); }
         requestAnimationFrame(animate);
       }
 
-      document.fonts.ready.then(() => {
-        setupCanvas();
-        sampleText();
-        requestAnimationFrame(animate);
-      });
+      document.fonts.ready.then(() => { setupCanvas(); sampleText(); requestAnimationFrame(animate); });
 
       let resizeTimer;
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          setupCanvas();
-          sampleText();
-          assembled = true;
-          startTime = 0;
-          frame = 0;
-          revealed = false;
-        }, 300);
+        resizeTimer = setTimeout(() => { setupCanvas(); sampleText(); assembled = true; startTime = 0; frame = 0; revealed = false; }, 300);
       });
     })();
   </script>
