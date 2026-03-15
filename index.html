@@ -375,6 +375,11 @@
           <textarea id="cf-message" name="message" required rows="4" placeholder="简单描述您的需求，例如：本科毕业论文，Java Web 方向…"
             class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 outline-none focus:border-cyan/50 focus:ring-1 focus:ring-cyan/30 transition-colors resize-none"></textarea>
         </div>
+        <div>
+          <label for="cf-referral" class="block text-slate-300 text-xs font-medium mb-2">推荐码 <span class="text-slate-500">（选填）</span></label>
+          <input id="cf-referral" name="referralCode" type="text" placeholder="如有推荐码请填写"
+            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 outline-none focus:border-cyan/50 focus:ring-1 focus:ring-cyan/30 transition-colors" />
+        </div>
         <button type="submit" id="cf-submit"
           class="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-black font-semibold px-8 py-3.5 rounded-full transition-colors duration-200 cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed">
           <span id="cf-btn-text">提交咨询</span>
@@ -661,6 +666,7 @@
         const name = form.name.value.trim();
         const contact = form.contact.value.trim();
         const message = form.message.value.trim();
+        const referralCode = form.referralCode.value.trim();
         if (!contact || !message) return;
 
         btn.disabled = true;
@@ -672,7 +678,7 @@
           const res = await fetch('/api/consult', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, contact, message })
+            body: JSON.stringify({ name, contact, message, referralCode })
           });
           if (!res.ok) throw new Error('fail');
           form.reset();

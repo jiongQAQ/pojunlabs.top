@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PoJun Labs 管理后台</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { navy: { DEFAULT: '#0a0e1a', card: '#111827', light: '#0d1224' }, cyan: '#22d3ee' },
+          fontFamily: { heading: ['Inter', 'system-ui', 'sans-serif'], body: ['Inter', 'system-ui', 'sans-serif'] },
+        }
+      }
+    };
+  </script>
+  <link rel="icon" href="/logo.png" />
+</head>
+<body class="bg-navy text-white font-body min-h-screen">
+
+  <!-- Login -->
+  <div id="login-page" class="min-h-screen flex items-center justify-center px-4">
+    <form id="login-form" class="w-full max-w-sm bg-navy-card border border-white/5 rounded-2xl p-8 space-y-5">
+      <h1 class="font-heading font-bold text-xl text-center mb-2">管理后台</h1>
+      <div>
+        <label class="block text-slate-400 text-xs mb-2">用户名</label>
+        <input id="login-user" type="text" required autocomplete="username"
+          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+      </div>
+      <div>
+        <label class="block text-slate-400 text-xs mb-2">密码</label>
+        <input id="login-pass" type="password" required autocomplete="current-password"
+          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+      </div>
+      <div id="login-error" class="hidden text-red-400 text-xs text-center"></div>
+      <button type="submit" class="w-full bg-cyan text-black font-semibold py-3 rounded-full text-sm hover:bg-cyan/90 transition-colors">登录</button>
+    </form>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden">
+    <!-- Nav -->
+    <nav class="border-b border-white/5 bg-navy-card/50 backdrop-blur sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+        <div class="flex items-center gap-3">
+          <img src="/logo.png" alt="" class="h-6 w-6 rounded" />
+          <span class="font-heading font-semibold text-sm">PoJun Labs Admin</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <button id="tab-consults" onclick="switchTab('consults')" class="tab-btn px-4 py-1.5 rounded-full text-xs font-medium transition-colors">咨询单</button>
+          <button id="tab-referrals" onclick="switchTab('referrals')" class="tab-btn px-4 py-1.5 rounded-full text-xs font-medium transition-colors">推荐码</button>
+        </div>
+        <button onclick="logout()" class="text-slate-500 hover:text-white text-xs transition-colors">退出</button>
+      </div>
+    </nav>
+
+    <!-- Consults -->
+    <div id="panel-consults" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-heading font-bold text-lg">咨询单列表</h2>
+        <button onclick="loadConsults()" class="text-xs text-slate-400 hover:text-cyan transition-colors">刷新</button>
+      </div>
+      <div class="overflow-x-auto rounded-xl border border-white/5">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-navy-card/50 text-slate-400 text-xs">
+              <th class="text-left px-4 py-3 font-medium">时间</th>
+              <th class="text-left px-4 py-3 font-medium">称呼</th>
+              <th class="text-left px-4 py-3 font-medium">联系方式</th>
+              <th class="text-left px-4 py-3 font-medium">需求</th>
+              <th class="text-left px-4 py-3 font-medium">推荐</th>
+            </tr>
+          </thead>
+          <tbody id="consults-body" class="divide-y divide-white/5"></tbody>
+        </table>
+      </div>
+      <p id="consults-empty" class="hidden text-slate-500 text-sm text-center py-12">暂无咨询单</p>
+    </div>
+
+    <!-- Referrals -->
+    <div id="panel-referrals" class="hidden max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-heading font-bold text-lg">推荐码管理</h2>
+        <button onclick="loadReferrals()" class="text-xs text-slate-400 hover:text-cyan transition-colors">刷新</button>
+      </div>
+
+      <!-- Create form -->
+      <form id="ref-form" class="bg-navy-card border border-white/5 rounded-xl p-6 mb-8 flex flex-col sm:flex-row gap-4 items-end">
+        <div class="flex-1">
+          <label class="block text-slate-400 text-xs mb-2">推荐人</label>
+          <input id="ref-referrer" type="text" required placeholder="推荐人名称"
+            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+        </div>
+        <div class="flex-1">
+          <label class="block text-slate-400 text-xs mb-2">备注 <span class="text-slate-600">（选填）</span></label>
+          <input id="ref-note" type="text" placeholder="备注信息"
+            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+        </div>
+        <button type="submit" class="bg-cyan text-black font-semibold px-6 py-2.5 rounded-full text-sm hover:bg-cyan/90 transition-colors whitespace-nowrap">生成推荐码</button>
+      </form>
+
+      <!-- New code highlight -->
+      <div id="ref-new" class="hidden bg-cyan/10 border border-cyan/20 rounded-xl p-4 mb-6 text-center">
+        <p class="text-slate-400 text-xs mb-1">新推荐码已生成</p>
+        <p class="font-mono text-2xl font-bold text-cyan tracking-widest" id="ref-new-code"></p>
+      </div>
+
+      <!-- List -->
+      <div class="overflow-x-auto rounded-xl border border-white/5">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-navy-card/50 text-slate-400 text-xs">
+              <th class="text-left px-4 py-3 font-medium">推荐码</th>
+              <th class="text-left px-4 py-3 font-medium">推荐人</th>
+              <th class="text-left px-4 py-3 font-medium">备注</th>
+              <th class="text-left px-4 py-3 font-medium">创建时间</th>
+            </tr>
+          </thead>
+          <tbody id="referrals-body" class="divide-y divide-white/5"></tbody>
+        </table>
+      </div>
+      <p id="referrals-empty" class="hidden text-slate-500 text-sm text-center py-12">暂无推荐码</p>
+    </div>
+  </div>
+
+  <script>
+    let token = sessionStorage.getItem('admin_token');
+
+    if (token) showDashboard();
+
+    // --- Auth ---
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('login-error');
+      errEl.classList.add('hidden');
+      const username = document.getElementById('login-user').value.trim();
+      const password = document.getElementById('login-pass').value;
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        if (!res.ok) throw new Error('fail');
+        const data = await res.json();
+        token = data.token;
+        sessionStorage.setItem('admin_token', token);
+        showDashboard();
+      } catch {
+        errEl.textContent = '用户名或密码错误';
+        errEl.classList.remove('hidden');
+      }
+    });
+
+    function logout() {
+      token = null;
+      sessionStorage.removeItem('admin_token');
+      location.reload();
+    }
+
+    function showDashboard() {
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      switchTab('consults');
+    }
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        ...opts,
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(opts.headers || {}) }
+      });
+      if (res.status === 401) { logout(); throw new Error('unauthorized'); }
+      return res.json();
+    }
+
+    // --- Tabs ---
+
+    function switchTab(tab) {
+      document.getElementById('panel-consults').classList.toggle('hidden', tab !== 'consults');
+      document.getElementById('panel-referrals').classList.toggle('hidden', tab !== 'referrals');
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('bg-cyan/20', b.id === `tab-${tab}`);
+        b.classList.toggle('text-cyan', b.id === `tab-${tab}`);
+        b.classList.toggle('text-slate-400', b.id !== `tab-${tab}`);
+      });
+      if (tab === 'consults') loadConsults();
+      else loadReferrals();
+    }
+
+    // --- Consults ---
+
+    async function loadConsults() {
+      const body = document.getElementById('consults-body');
+      const empty = document.getElementById('consults-empty');
+      try {
+        const list = await api('/api/admin/consults');
+        if (!list.length) {
+          body.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        body.innerHTML = list.map(c => {
+          const t = new Date(c.ts).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+          const ref = c.referrer ? `<span class="text-cyan">${esc(c.referrer)}</span><br><span class="text-slate-500 text-xs">${esc(c.referralCode)}</span>` : '<span class="text-slate-600">-</span>';
+          return `<tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">${esc(t)}</td>
+            <td class="px-4 py-3 text-white">${esc(c.name || '-')}</td>
+            <td class="px-4 py-3 text-cyan">${esc(c.contact)}</td>
+            <td class="px-4 py-3 text-slate-300 max-w-xs truncate">${esc(c.message)}</td>
+            <td class="px-4 py-3">${ref}</td>
+          </tr>`;
+        }).join('');
+      } catch {}
+    }
+
+    // --- Referrals ---
+
+    async function loadReferrals() {
+      const body = document.getElementById('referrals-body');
+      const empty = document.getElementById('referrals-empty');
+      try {
+        const list = await api('/api/admin/referrals');
+        if (!list.length) {
+          body.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        body.innerHTML = list.map(r => {
+          const t = new Date(r.createdAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+          return `<tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="px-4 py-3 font-mono font-bold text-cyan tracking-wider">${esc(r.code)}</td>
+            <td class="px-4 py-3 text-white">${esc(r.referrer)}</td>
+            <td class="px-4 py-3 text-slate-400">${esc(r.note || '-')}</td>
+            <td class="px-4 py-3 text-slate-400 text-xs">${esc(t)}</td>
+          </tr>`;
+        }).join('');
+      } catch {}
+    }
+
+    document.getElementById('ref-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const referrer = document.getElementById('ref-referrer').value.trim();
+      const note = document.getElementById('ref-note').value.trim();
+      if (!referrer) return;
+      try {
+        const entry = await api('/api/admin/referrals', {
+          method: 'POST',
+          body: JSON.stringify({ referrer, note })
+        });
+        document.getElementById('ref-new-code').textContent = entry.code;
+        document.getElementById('ref-new').classList.remove('hidden');
+        document.getElementById('ref-referrer').value = '';
+        document.getElementById('ref-note').value = '';
+        loadReferrals();
+      } catch {}
+    });
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
