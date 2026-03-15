@@ -313,7 +313,7 @@
 
       const canvas = document.getElementById('particle-canvas');
       const ctx = canvas.getContext('2d');
-      let w, h, particles, mouse = { x: -9999, y: -9999 }, dpr;
+      let w, h, particles, mouse = { x: -9999, y: -9999 }, dpr, time = 0;
 
       function resize() {
         dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -325,93 +325,123 @@
       }
 
       function createParticles() {
-        const count = Math.min(Math.floor((w * h) / 6000), 220);
+        const count = Math.min(Math.floor((w * h) / 5000), 260);
         particles = [];
         const cx = w / 2, cy = h * 0.42;
-        const bandW = w * 0.42, bandH = h * 0.18;
+        const bandW = w * 0.44, bandH = h * 0.2;
 
         for (let i = 0; i < count; i++) {
-          const inBand = Math.random() < 0.65;
+          const inBand = Math.random() < 0.6;
           let x, y;
           if (inBand) {
             const angle = Math.random() * Math.PI * 2;
             const rx = (Math.random() * 0.5 + 0.5) * bandW;
             const ry = (Math.random() * 0.5 + 0.5) * bandH;
-            x = cx + Math.cos(angle) * rx + (Math.random() - 0.5) * bandW * 0.3;
-            y = cy + Math.sin(angle) * ry + (Math.random() - 0.5) * bandH * 0.5;
+            x = cx + Math.cos(angle) * rx;
+            y = cy + Math.sin(angle) * ry;
           } else {
             x = Math.random() * w;
             y = Math.random() * h;
           }
+          const speed = 0.3 + Math.random() * 0.8;
+          const dir = Math.random() * Math.PI * 2;
           particles.push({
             x, y,
-            ox: x, oy: y,
-            vx: (Math.random() - 0.5) * 0.3,
-            vy: (Math.random() - 0.5) * 0.3,
-            r: Math.random() * 1.5 + 0.5,
-            alpha: Math.random() * 0.6 + 0.4,
-            pulse: Math.random() * Math.PI * 2,
+            baseX: x, baseY: y,
+            vx: Math.cos(dir) * speed,
+            vy: Math.sin(dir) * speed,
+            r: Math.random() * 2 + 0.8,
+            alpha: Math.random() * 0.5 + 0.5,
+            phase: Math.random() * Math.PI * 2,
+            freq: 0.008 + Math.random() * 0.015,
+            ampX: 30 + Math.random() * 60,
+            ampY: 20 + Math.random() * 40,
+            wander: 0.002 + Math.random() * 0.004,
           });
         }
       }
 
-      const linkDist = 120;
-      const mouseDist = 180;
+      const linkDist = 130;
+      const mouseDist = 200;
+      const mouseRepel = 250;
 
       function draw() {
+        time++;
         ctx.clearRect(0, 0, w, h);
 
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
-          p.pulse += 0.015;
-          const glow = 0.5 + 0.5 * Math.sin(p.pulse);
+          const glow = 0.5 + 0.5 * Math.sin(p.phase + time * 0.03);
 
-          p.x += p.vx;
-          p.y += p.vy;
+          p.vx += Math.sin(time * p.wander + p.phase) * 0.04;
+          p.vy += Math.cos(time * p.wander * 0.7 + p.phase) * 0.03;
 
-          const dx = p.x - p.ox;
-          const dy = p.y - p.oy;
-          const drift = Math.sqrt(dx * dx + dy * dy);
-          if (drift > 80) {
-            p.vx *= -0.5;
-            p.vy *= -0.5;
-          }
+          const wave = Math.sin(time * p.freq + p.phase);
+          p.x = p.baseX + Math.sin(time * p.freq + p.phase) * p.ampX + p.vx * 2;
+          p.y = p.baseY + Math.cos(time * p.freq * 0.8 + p.phase) * p.ampY + p.vy * 2;
 
-          if (p.x < -20) p.x = w + 20;
-          if (p.x > w + 20) p.x = -20;
-          if (p.y < -20) p.y = h + 20;
-          if (p.y > h + 20) p.y = -20;
+          p.baseX += p.vx * 0.15;
+          p.baseY += p.vy * 0.15;
+
+          if (p.baseX < -40) p.baseX = w + 40;
+          if (p.baseX > w + 40) p.baseX = -40;
+          if (p.baseY < -40) p.baseY = h + 40;
+          if (p.baseY > h + 40) p.baseY = -40;
 
           const mdx = mouse.x - p.x;
           const mdy = mouse.y - p.y;
           const md = Math.sqrt(mdx * mdx + mdy * mdy);
-          if (md < mouseDist) {
-            const force = (1 - md / mouseDist) * 0.02;
-            p.vx += mdx * force;
-            p.vy += mdy * force;
+          if (md < mouseRepel && md > 0) {
+            const pushForce = (1 - md / mouseRepel) * 3;
+            p.x -= (mdx / md) * pushForce;
+            p.y -= (mdy / md) * pushForce;
           }
 
-          p.vx *= 0.99;
-          p.vy *= 0.99;
+          p.vx *= 0.97;
+          p.vy *= 0.97;
+
+          const drawR = p.r * (0.7 + glow * 0.6);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, drawR + 2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(34,184,207,${p.alpha * glow * 0.15})`;
+          ctx.fill();
 
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * (0.8 + glow * 0.4), 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(34,184,207,${p.alpha * (0.6 + glow * 0.4)})`;
+          ctx.arc(p.x, p.y, drawR, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(220,240,255,${p.alpha * (0.5 + glow * 0.5)})`;
           ctx.fill();
         }
 
+        ctx.lineWidth = 0.5;
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const a = particles[i], b = particles[j];
             const ddx = a.x - b.x, ddy = a.y - b.y;
-            const dist = Math.sqrt(ddx * ddx + ddy * ddy);
-            if (dist < linkDist) {
-              const alpha = (1 - dist / linkDist) * 0.25;
+            const dist = ddx * ddx + ddy * ddy;
+            if (dist < linkDist * linkDist) {
+              const d = Math.sqrt(dist);
+              const alpha = (1 - d / linkDist) * 0.3;
               ctx.beginPath();
               ctx.moveTo(a.x, a.y);
               ctx.lineTo(b.x, b.y);
               ctx.strokeStyle = `rgba(34,184,207,${alpha})`;
-              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+
+        const mdx2 = mouse.x, mdy2 = mouse.y;
+        if (mdx2 > 0 && mdy2 > 0 && mdx2 < w && mdy2 < h) {
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            const dx = mouse.x - p.x, dy = mouse.y - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < mouseDist) {
+              const alpha = (1 - dist / mouseDist) * 0.2;
+              ctx.beginPath();
+              ctx.moveTo(mouse.x, mouse.y);
+              ctx.lineTo(p.x, p.y);
+              ctx.strokeStyle = `rgba(34,184,207,${alpha})`;
               ctx.stroke();
             }
           }
@@ -427,12 +457,12 @@
       }
 
       window.addEventListener('resize', () => { resize(); createParticles(); });
-      canvas.addEventListener('mousemove', e => {
+      canvas.parentElement.addEventListener('mousemove', e => {
         const rect = canvas.getBoundingClientRect();
         mouse.x = e.clientX - rect.left;
         mouse.y = e.clientY - rect.top;
       });
-      canvas.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+      canvas.parentElement.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
 
       init();
     })();
