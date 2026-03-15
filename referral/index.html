@@ -17,8 +17,8 @@
   </script>
   <link rel="icon" href="/logo.png" />
   <style>
-    .slider-track { position: relative; width: 100%; height: 44px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; user-select: none; }
-    .slider-puzzle { position: absolute; top: 2px; width: 40px; height: 40px; background: #22d3ee; border-radius: 10px; cursor: grab; display: flex; align-items: center; justify-content: center; transition: none; z-index: 2; }
+    .slider-track { position: relative; width: 100%; height: 44px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); user-select: none; touch-action: none; }
+    .slider-puzzle { position: absolute; top: 2px; width: 40px; height: 40px; background: #22d3ee; border-radius: 10px; cursor: grab; display: flex; align-items: center; justify-content: center; transition: none; z-index: 2; touch-action: none; }
     .slider-puzzle:active { cursor: grabbing; }
     .slider-puzzle svg { width: 18px; height: 18px; color: #0a0e1a; pointer-events: none; }
     .slider-target { position: absolute; top: 2px; width: 40px; height: 40px; border: 2px dashed rgba(34,211,238,0.4); border-radius: 10px; z-index: 1; }
@@ -156,17 +156,14 @@
           this.targetX = data.target;
         } catch { this.targetX = 150; }
 
-        const trackWidth = 320;
         const puzzleW = 40;
-        const maxX = trackWidth - puzzleW - 4;
-        const targetLeft = Math.min(this.targetX, maxX);
 
         this.container.innerHTML = `
           <label class="block text-slate-400 text-xs mb-2">滑块验证</label>
-          <div class="slider-track" style="max-width:${trackWidth}px">
+          <div class="slider-track">
             <div class="slider-fill"></div>
             <div class="slider-hint">拖动滑块到缺口位置</div>
-            <div class="slider-target" style="left:${targetLeft}px"></div>
+            <div class="slider-target"></div>
             <div class="slider-puzzle" style="left:2px">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
             </div>
@@ -177,21 +174,34 @@
         const puzzle = this.container.querySelector('.slider-puzzle');
         const fill = this.container.querySelector('.slider-fill');
         const hint = this.container.querySelector('.slider-hint');
-        let dragging = false, startX = 0, currentX = 2;
+        const targetEl = this.container.querySelector('.slider-target');
+        let dragging = false, offsetX = 0, currentX = 2;
+
+        const getMaxX = () => track.getBoundingClientRect().width - puzzleW - 4;
+        const getTargetLeft = () => {
+          const ratio = this.targetX / 280;
+          return Math.round(ratio * getMaxX());
+        };
+
+        const placeTarget = () => { targetEl.style.left = getTargetLeft() + 'px'; };
+        placeTarget();
+
+        const getClientX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
 
         const onStart = (e) => {
           if (this.verified) return;
+          e.preventDefault();
           dragging = true;
-          startX = (e.touches ? e.touches[0].clientX : e.clientX) - currentX;
+          offsetX = getClientX(e) - currentX;
           puzzle.style.transition = 'none';
         };
 
         const onMove = (e) => {
           if (!dragging) return;
           e.preventDefault();
-          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-          let x = clientX - startX;
-          x = Math.max(2, Math.min(x, maxX));
+          const mx = getMaxX();
+          let x = getClientX(e) - offsetX;
+          x = Math.max(2, Math.min(x, mx));
           currentX = x;
           puzzle.style.left = x + 'px';
           fill.style.width = (x + puzzleW) + 'px';
@@ -200,9 +210,10 @@
         const onEnd = () => {
           if (!dragging) return;
           dragging = false;
-          if (Math.abs(currentX - targetLeft) <= 5) {
+          const tl = getTargetLeft();
+          if (Math.abs(currentX - tl) <= 6) {
             this.verified = true;
-            this.captchaX = currentX;
+            this.captchaX = this.targetX;
             track.classList.add('slider-ok');
             hint.textContent = '验证通过';
           } else {
@@ -216,7 +227,7 @@
 
         puzzle.addEventListener('mousedown', onStart);
         puzzle.addEventListener('touchstart', onStart, { passive: false });
-        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mousemove', onMove, { passive: false });
         document.addEventListener('touchmove', onMove, { passive: false });
         document.addEventListener('mouseup', onEnd);
         document.addEventListener('touchend', onEnd);
@@ -228,9 +239,12 @@
           const data = await res.json();
           this.captchaToken = data.token;
           this.targetX = data.target;
-          const maxX = 320 - 40 - 4;
+          const track = this.container.querySelector('.slider-track');
           const target = this.container.querySelector('.slider-target');
-          if (target) target.style.left = Math.min(this.targetX, maxX) + 'px';
+          if (track && target) {
+            const mx = track.getBoundingClientRect().width - 40 - 4;
+            target.style.left = Math.round((this.targetX / 280) * mx) + 'px';
+          }
         } catch {}
       }
 
