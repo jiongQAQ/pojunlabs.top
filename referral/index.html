@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>推荐码 - PoJun Labs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { navy: { DEFAULT: '#0a0e1a', card: '#111827', light: '#0d1224' }, cyan: '#22d3ee' },
+          fontFamily: { heading: ['Inter', 'system-ui', 'sans-serif'], body: ['Inter', 'system-ui', 'sans-serif'] },
+        }
+      }
+    };
+  </script>
+  <link rel="icon" href="/logo.png" />
+  <style>
+    .slider-track { position: relative; width: 100%; height: 44px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; user-select: none; }
+    .slider-puzzle { position: absolute; top: 2px; width: 40px; height: 40px; background: #22d3ee; border-radius: 10px; cursor: grab; display: flex; align-items: center; justify-content: center; transition: none; z-index: 2; }
+    .slider-puzzle:active { cursor: grabbing; }
+    .slider-puzzle svg { width: 18px; height: 18px; color: #0a0e1a; pointer-events: none; }
+    .slider-target { position: absolute; top: 2px; width: 40px; height: 40px; border: 2px dashed rgba(34,211,238,0.4); border-radius: 10px; z-index: 1; }
+    .slider-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(148,163,184,0.5); font-size: 12px; pointer-events: none; z-index: 0; }
+    .slider-fill { position: absolute; top: 0; left: 0; height: 100%; background: rgba(34,211,238,0.08); border-radius: 12px; z-index: 0; }
+    .slider-ok .slider-puzzle { background: #10b981; }
+    .slider-ok .slider-fill { background: rgba(16,185,129,0.1); }
+    .slider-ok .slider-hint { color: rgba(16,185,129,0.6); }
+  </style>
+</head>
+<body class="bg-navy text-white font-body min-h-screen">
+
+  <!-- Header -->
+  <header class="border-b border-white/5 bg-navy-card/50 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <img src="/logo.png" alt="" class="h-6 w-6 rounded" />
+        <span class="font-heading font-semibold text-sm">PoJun Labs</span>
+      </a>
+      <div id="header-user" class="hidden flex items-center gap-4">
+        <span class="text-slate-400 text-xs">欢迎, <span id="header-username" class="text-cyan"></span></span>
+        <button onclick="logout()" class="text-slate-500 hover:text-white text-xs transition-colors">退出</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Auth Page -->
+  <div id="auth-page" class="max-w-sm mx-auto px-4 py-16">
+    <h1 class="font-heading font-bold text-2xl text-center mb-2">推荐码计划</h1>
+    <p class="text-slate-400 text-sm text-center mb-8">注册账号，生成您的专属推荐码</p>
+
+    <!-- Tabs -->
+    <div class="flex bg-navy-card rounded-xl p-1 mb-6">
+      <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors">登录</button>
+      <button id="tab-register" onclick="switchAuthTab('register')" class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors">注册</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" class="space-y-4">
+      <div>
+        <label class="block text-slate-400 text-xs mb-2">用户名</label>
+        <input id="l-user" type="text" required autocomplete="username"
+          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+      </div>
+      <div>
+        <label class="block text-slate-400 text-xs mb-2">密码</label>
+        <input id="l-pass" type="password" required autocomplete="current-password"
+          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+      </div>
+      <div id="l-captcha" class="captcha-wrap"></div>
+      <div id="l-error" class="hidden text-red-400 text-xs text-center"></div>
+      <button type="submit" class="w-full bg-cyan text-black font-semibold py-3 rounded-full text-sm hover:bg-cyan/90 transition-colors disabled:opacity-50" id="l-btn">登录</button>
+    </form>
+
+    <!-- Register Form -->
+    <form id="register-form" class="hidden space-y-4">
+      <div>
+        <label class="block text-slate-400 text-xs mb-2">用户名 <span class="text-slate-600">(2-20 字符)</span></label>
+        <input id="r-user" type="text" required autocomplete="username" minlength="2" maxlength="20"
+          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+      </div>
+      <div>
+        <label class="block text-slate-400 text-xs mb-2">密码 <span class="text-slate-600">(至少 6 位)</span></label>
+        <input id="r-pass" type="password" required autocomplete="new-password" minlength="6"
+          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+      </div>
+      <div>
+        <label class="block text-slate-400 text-xs mb-2">确认密码</label>
+        <input id="r-pass2" type="password" required autocomplete="new-password"
+          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyan/50 transition-colors" />
+      </div>
+      <div id="r-captcha" class="captcha-wrap"></div>
+      <div id="r-error" class="hidden text-red-400 text-xs text-center"></div>
+      <button type="submit" class="w-full bg-cyan text-black font-semibold py-3 rounded-full text-sm hover:bg-cyan/90 transition-colors disabled:opacity-50" id="r-btn">注册</button>
+    </form>
+  </div>
+
+  <!-- Dashboard Page -->
+  <div id="dash-page" class="hidden max-w-2xl mx-auto px-4 py-16">
+    <div class="text-center mb-10">
+      <h1 class="font-heading font-bold text-2xl mb-2">我的推荐码</h1>
+      <p class="text-slate-400 text-sm">分享推荐码给朋友，他们咨询时填写即可关联到您</p>
+    </div>
+
+    <!-- Generate -->
+    <div class="bg-navy-card border border-white/5 rounded-2xl p-6 sm:p-8 mb-6 text-center">
+      <button onclick="generateReferral()" id="gen-btn"
+        class="bg-cyan text-black font-semibold px-8 py-3 rounded-full text-sm hover:bg-cyan/90 transition-colors disabled:opacity-50">
+        生成新推荐码
+      </button>
+      <p class="text-slate-500 text-xs mt-3">每人最多 10 个推荐码</p>
+    </div>
+
+    <!-- New code flash -->
+    <div id="new-code" class="hidden bg-cyan/10 border border-cyan/20 rounded-xl p-5 mb-6 text-center">
+      <p class="text-slate-400 text-xs mb-1">新推荐码已生成，复制分享给朋友</p>
+      <p class="font-mono text-3xl font-bold text-cyan tracking-widest" id="new-code-text"></p>
+      <button onclick="copyCode()" class="mt-3 text-xs text-slate-400 hover:text-cyan transition-colors underline underline-offset-4">点击复制</button>
+    </div>
+
+    <!-- List -->
+    <div class="bg-navy-card border border-white/5 rounded-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+        <h3 class="font-medium text-sm">我的推荐码列表</h3>
+        <span id="ref-count" class="text-slate-500 text-xs"></span>
+      </div>
+      <div id="ref-list" class="divide-y divide-white/5"></div>
+      <p id="ref-empty" class="hidden text-slate-500 text-sm text-center py-10">还没有推荐码，点击上方按钮生成</p>
+    </div>
+  </div>
+
+  <script>
+    let token = sessionStorage.getItem('user_token');
+    let username = sessionStorage.getItem('user_name');
+
+    // --- Init ---
+    if (token) showDashboard();
+    else switchAuthTab('login');
+
+    // --- Captcha ---
+    class SliderCaptcha {
+      constructor(container) {
+        this.container = container;
+        this.verified = false;
+        this.captchaToken = null;
+        this.captchaX = null;
+        this.render();
+      }
+
+      async render() {
+        try {
+          const res = await fetch('/api/captcha');
+          const data = await res.json();
+          this.captchaToken = data.token;
+          this.targetX = data.target;
+        } catch { this.targetX = 150; }
+
+        const trackWidth = 320;
+        const puzzleW = 40;
+        const maxX = trackWidth - puzzleW - 4;
+        const targetLeft = Math.min(this.targetX, maxX);
+
+        this.container.innerHTML = `
+          <label class="block text-slate-400 text-xs mb-2">滑块验证</label>
+          <div class="slider-track" style="max-width:${trackWidth}px">
+            <div class="slider-fill"></div>
+            <div class="slider-hint">拖动滑块到缺口位置</div>
+            <div class="slider-target" style="left:${targetLeft}px"></div>
+            <div class="slider-puzzle" style="left:2px">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </div>
+          </div>
+        `;
+
+        const track = this.container.querySelector('.slider-track');
+        const puzzle = this.container.querySelector('.slider-puzzle');
+        const fill = this.container.querySelector('.slider-fill');
+        const hint = this.container.querySelector('.slider-hint');
+        let dragging = false, startX = 0, currentX = 2;
+
+        const onStart = (e) => {
+          if (this.verified) return;
+          dragging = true;
+          startX = (e.touches ? e.touches[0].clientX : e.clientX) - currentX;
+          puzzle.style.transition = 'none';
+        };
+
+        const onMove = (e) => {
+          if (!dragging) return;
+          e.preventDefault();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          let x = clientX - startX;
+          x = Math.max(2, Math.min(x, maxX));
+          currentX = x;
+          puzzle.style.left = x + 'px';
+          fill.style.width = (x + puzzleW) + 'px';
+        };
+
+        const onEnd = () => {
+          if (!dragging) return;
+          dragging = false;
+          if (Math.abs(currentX - targetLeft) <= 5) {
+            this.verified = true;
+            this.captchaX = currentX;
+            track.classList.add('slider-ok');
+            hint.textContent = '验证通过';
+          } else {
+            puzzle.style.transition = 'left 0.3s';
+            puzzle.style.left = '2px';
+            fill.style.width = '0px';
+            currentX = 2;
+            this.refresh();
+          }
+        };
+
+        puzzle.addEventListener('mousedown', onStart);
+        puzzle.addEventListener('touchstart', onStart, { passive: false });
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchend', onEnd);
+      }
+
+      async refresh() {
+        try {
+          const res = await fetch('/api/captcha');
+          const data = await res.json();
+          this.captchaToken = data.token;
+          this.targetX = data.target;
+          const maxX = 320 - 40 - 4;
+          const target = this.container.querySelector('.slider-target');
+          if (target) target.style.left = Math.min(this.targetX, maxX) + 'px';
+        } catch {}
+      }
+
+      getData() {
+        return { captchaToken: this.captchaToken, captchaX: this.captchaX };
+      }
+    }
+
+    let loginCaptcha, registerCaptcha;
+
+    function initCaptchas() {
+      loginCaptcha = new SliderCaptcha(document.getElementById('l-captcha'));
+      registerCaptcha = new SliderCaptcha(document.getElementById('r-captcha'));
+    }
+    initCaptchas();
+
+    // --- Auth Tabs ---
+    function switchAuthTab(tab) {
+      document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+      const tl = document.getElementById('tab-login');
+      const tr = document.getElementById('tab-register');
+      tl.className = `flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'login' ? 'bg-cyan/20 text-cyan' : 'text-slate-400'}`;
+      tr.className = `flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'register' ? 'bg-cyan/20 text-cyan' : 'text-slate-400'}`;
+    }
+
+    // --- Login ---
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('l-error');
+      errEl.classList.add('hidden');
+      if (!loginCaptcha.verified) { showErr(errEl, '请先完成滑块验证'); return; }
+      const btn = document.getElementById('l-btn');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/user/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('l-user').value.trim(),
+            password: document.getElementById('l-pass').value,
+            ...loginCaptcha.getData()
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'fail');
+        token = data.token;
+        username = data.username;
+        sessionStorage.setItem('user_token', token);
+        sessionStorage.setItem('user_name', username);
+        showDashboard();
+      } catch (err) {
+        showErr(errEl, err.message);
+        loginCaptcha = new SliderCaptcha(document.getElementById('l-captcha'));
+      } finally { btn.disabled = false; }
+    });
+
+    // --- Register ---
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('r-error');
+      errEl.classList.add('hidden');
+      const pass = document.getElementById('r-pass').value;
+      const pass2 = document.getElementById('r-pass2').value;
+      if (pass !== pass2) { showErr(errEl, '两次密码不一致'); return; }
+      if (!registerCaptcha.verified) { showErr(errEl, '请先完成滑块验证'); return; }
+      const btn = document.getElementById('r-btn');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/user/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('r-user').value.trim(),
+            password: pass,
+            ...registerCaptcha.getData()
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'fail');
+        token = data.token;
+        username = data.username;
+        sessionStorage.setItem('user_token', token);
+        sessionStorage.setItem('user_name', username);
+        showDashboard();
+      } catch (err) {
+        showErr(errEl, err.message);
+        registerCaptcha = new SliderCaptcha(document.getElementById('r-captcha'));
+      } finally { btn.disabled = false; }
+    });
+
+    function showErr(el, msg) {
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    function logout() {
+      token = null; username = null;
+      sessionStorage.removeItem('user_token');
+      sessionStorage.removeItem('user_name');
+      location.reload();
+    }
+
+    // --- Dashboard ---
+    function showDashboard() {
+      document.getElementById('auth-page').classList.add('hidden');
+      document.getElementById('dash-page').classList.remove('hidden');
+      document.getElementById('header-user').classList.remove('hidden');
+      document.getElementById('header-user').style.display = 'flex';
+      document.getElementById('header-username').textContent = username;
+      loadMyReferrals();
+    }
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        ...opts,
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(opts.headers || {}) }
+      });
+      if (res.status === 401) { logout(); throw new Error('unauthorized'); }
+      return res;
+    }
+
+    async function loadMyReferrals() {
+      try {
+        const res = await api('/api/user/me');
+        const data = await res.json();
+        const list = data.referrals || [];
+        const container = document.getElementById('ref-list');
+        const empty = document.getElementById('ref-empty');
+        document.getElementById('ref-count').textContent = `${list.length} / 10`;
+
+        if (!list.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
+        empty.classList.add('hidden');
+        container.innerHTML = list.map(r => {
+          const t = new Date(r.createdAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+          return `<div class="flex items-center justify-between px-6 py-4">
+            <div>
+              <span class="font-mono font-bold text-cyan tracking-wider text-lg">${esc(r.code)}</span>
+              <p class="text-slate-500 text-xs mt-1">${esc(t)}</p>
+            </div>
+            <button onclick="navigator.clipboard.writeText('${esc(r.code)}')" class="text-xs text-slate-400 hover:text-cyan transition-colors">复制</button>
+          </div>`;
+        }).join('');
+      } catch {}
+    }
+
+    async function generateReferral() {
+      const btn = document.getElementById('gen-btn');
+      btn.disabled = true;
+      try {
+        const res = await api('/api/user/referral', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'fail');
+        document.getElementById('new-code-text').textContent = data.code;
+        document.getElementById('new-code').classList.remove('hidden');
+        loadMyReferrals();
+      } catch (err) {
+        alert(err.message);
+      } finally { btn.disabled = false; }
+    }
+
+    function copyCode() {
+      const code = document.getElementById('new-code-text').textContent;
+      navigator.clipboard.writeText(code);
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  </script>
+</body>
+</html>
