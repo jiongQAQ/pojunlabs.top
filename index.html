@@ -351,20 +351,46 @@
     </div>
   </section>
 
-  <!-- ========== CTA + CONTACT ========== -->
+  <!-- ========== CTA + CONSULT FORM ========== -->
   <section id="contact" class="relative py-24 sm:py-32 bg-black overflow-hidden">
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan/5 rounded-full blur-[100px] pointer-events-none"></div>
-    <div class="relative max-w-3xl mx-auto px-6 text-center">
-      <div class="fade-up mb-12">
+    <div class="relative max-w-xl mx-auto px-6">
+      <div class="text-center fade-up mb-10">
         <h2 class="font-heading font-bold text-3xl sm:text-4xl text-white mb-4">准备好开始了吗？</h2>
-        <p class="text-slate-400 text-lg leading-relaxed">无论是毕业论文还是技术项目，发一条消息就能启动</p>
+        <p class="text-slate-400 text-lg leading-relaxed">留下联系方式，我们会在 24 小时内主动联系您</p>
       </div>
-      <div class="fade-up flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="#" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-black font-semibold px-8 py-3.5 rounded-full transition-colors duration-200 cursor-pointer text-sm">
-          联系我们
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-        </a>
-      </div>
+      <form id="consult-form" class="fade-up bg-navy-card/40 border border-white/5 rounded-2xl p-8 sm:p-10 space-y-5">
+        <div>
+          <label for="cf-name" class="block text-slate-300 text-xs font-medium mb-2">称呼</label>
+          <input id="cf-name" name="name" type="text" required placeholder="怎么称呼您"
+            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 outline-none focus:border-cyan/50 focus:ring-1 focus:ring-cyan/30 transition-colors" />
+        </div>
+        <div>
+          <label for="cf-contact" class="block text-slate-300 text-xs font-medium mb-2">联系方式 <span class="text-slate-500">（手机 / 微信）</span></label>
+          <input id="cf-contact" name="contact" type="text" required placeholder="手机号或微信号"
+            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 outline-none focus:border-cyan/50 focus:ring-1 focus:ring-cyan/30 transition-colors" />
+        </div>
+        <div>
+          <label for="cf-message" class="block text-slate-300 text-xs font-medium mb-2">需求描述</label>
+          <textarea id="cf-message" name="message" required rows="4" placeholder="简单描述您的需求，例如：本科毕业论文，Java Web 方向…"
+            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 outline-none focus:border-cyan/50 focus:ring-1 focus:ring-cyan/30 transition-colors resize-none"></textarea>
+        </div>
+        <button type="submit" id="cf-submit"
+          class="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-black font-semibold px-8 py-3.5 rounded-full transition-colors duration-200 cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+          <span id="cf-btn-text">提交咨询</span>
+          <svg id="cf-btn-arrow" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+          <svg id="cf-btn-spinner" class="w-4 h-4 animate-spin hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </button>
+        <div id="cf-success" class="hidden text-center py-4">
+          <div class="inline-flex items-center gap-2 text-cyan text-sm font-medium">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            已提交，我们会尽快联系您！
+          </div>
+        </div>
+        <div id="cf-error" class="hidden text-center py-2">
+          <p class="text-red-400 text-xs">提交失败，请稍后重试</p>
+        </div>
+      </form>
     </div>
   </section>
 
@@ -613,6 +639,54 @@
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => { setupCanvas(); sampleText(); assembled = true; startTime = 0; frame = 0; revealed = false; }, 300);
+      });
+    })();
+  </script>
+
+  <script>
+    (() => {
+      const form = document.getElementById('consult-form');
+      const btn = document.getElementById('cf-submit');
+      const btnText = document.getElementById('cf-btn-text');
+      const btnArrow = document.getElementById('cf-btn-arrow');
+      const btnSpinner = document.getElementById('cf-btn-spinner');
+      const successEl = document.getElementById('cf-success');
+      const errorEl = document.getElementById('cf-error');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorEl.classList.add('hidden');
+        successEl.classList.add('hidden');
+
+        const name = form.name.value.trim();
+        const contact = form.contact.value.trim();
+        const message = form.message.value.trim();
+        if (!contact || !message) return;
+
+        btn.disabled = true;
+        btnText.textContent = '提交中…';
+        btnArrow.classList.add('hidden');
+        btnSpinner.classList.remove('hidden');
+
+        try {
+          const res = await fetch('/api/consult', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, contact, message })
+          });
+          if (!res.ok) throw new Error('fail');
+          form.reset();
+          successEl.classList.remove('hidden');
+          form.querySelectorAll('input, textarea').forEach(el => el.disabled = true);
+          btn.classList.add('hidden');
+        } catch {
+          errorEl.classList.remove('hidden');
+        } finally {
+          btn.disabled = false;
+          btnText.textContent = '提交咨询';
+          btnArrow.classList.remove('hidden');
+          btnSpinner.classList.add('hidden');
+        }
       });
     })();
   </script>
