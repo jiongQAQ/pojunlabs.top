@@ -72,11 +72,11 @@
   </nav>
 
   <!-- ========== HERO ========== -->
-  <section class="relative min-h-screen flex items-center justify-center hero-grid overflow-hidden pt-20">
-    <div class="absolute inset-0 bg-gradient-to-b from-navy via-navy to-navy-light pointer-events-none"></div>
-    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-cyan/5 rounded-full blur-[120px] pointer-events-none"></div>
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-black">
+    <canvas id="particle-canvas" class="absolute inset-0 w-full h-full"></canvas>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy-light/80 pointer-events-none"></div>
 
-    <div class="relative max-w-4xl mx-auto px-6 text-center">
+    <div class="relative max-w-4xl mx-auto px-6 text-center z-10">
       <div class="fade-up mb-8">
         <img src="logo.png" alt="PoJun Labs" class="w-24 h-24 mx-auto rounded-2xl glow" />
       </div>
@@ -305,6 +305,137 @@
       });
     }, { threshold: 0.15 });
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    /* ---- Particle Network ---- */
+    (function() {
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reducedMotion) return;
+
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+      let w, h, particles, mouse = { x: -9999, y: -9999 }, dpr;
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = canvas.clientWidth;
+        h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function createParticles() {
+        const count = Math.min(Math.floor((w * h) / 6000), 220);
+        particles = [];
+        const cx = w / 2, cy = h * 0.42;
+        const bandW = w * 0.42, bandH = h * 0.18;
+
+        for (let i = 0; i < count; i++) {
+          const inBand = Math.random() < 0.65;
+          let x, y;
+          if (inBand) {
+            const angle = Math.random() * Math.PI * 2;
+            const rx = (Math.random() * 0.5 + 0.5) * bandW;
+            const ry = (Math.random() * 0.5 + 0.5) * bandH;
+            x = cx + Math.cos(angle) * rx + (Math.random() - 0.5) * bandW * 0.3;
+            y = cy + Math.sin(angle) * ry + (Math.random() - 0.5) * bandH * 0.5;
+          } else {
+            x = Math.random() * w;
+            y = Math.random() * h;
+          }
+          particles.push({
+            x, y,
+            ox: x, oy: y,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            r: Math.random() * 1.5 + 0.5,
+            alpha: Math.random() * 0.6 + 0.4,
+            pulse: Math.random() * Math.PI * 2,
+          });
+        }
+      }
+
+      const linkDist = 120;
+      const mouseDist = 180;
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.pulse += 0.015;
+          const glow = 0.5 + 0.5 * Math.sin(p.pulse);
+
+          p.x += p.vx;
+          p.y += p.vy;
+
+          const dx = p.x - p.ox;
+          const dy = p.y - p.oy;
+          const drift = Math.sqrt(dx * dx + dy * dy);
+          if (drift > 80) {
+            p.vx *= -0.5;
+            p.vy *= -0.5;
+          }
+
+          if (p.x < -20) p.x = w + 20;
+          if (p.x > w + 20) p.x = -20;
+          if (p.y < -20) p.y = h + 20;
+          if (p.y > h + 20) p.y = -20;
+
+          const mdx = mouse.x - p.x;
+          const mdy = mouse.y - p.y;
+          const md = Math.sqrt(mdx * mdx + mdy * mdy);
+          if (md < mouseDist) {
+            const force = (1 - md / mouseDist) * 0.02;
+            p.vx += mdx * force;
+            p.vy += mdy * force;
+          }
+
+          p.vx *= 0.99;
+          p.vy *= 0.99;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * (0.8 + glow * 0.4), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(34,184,207,${p.alpha * (0.6 + glow * 0.4)})`;
+          ctx.fill();
+        }
+
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const a = particles[i], b = particles[j];
+            const ddx = a.x - b.x, ddy = a.y - b.y;
+            const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+            if (dist < linkDist) {
+              const alpha = (1 - dist / linkDist) * 0.25;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(34,184,207,${alpha})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      function init() {
+        resize();
+        createParticles();
+        draw();
+      }
+
+      window.addEventListener('resize', () => { resize(); createParticles(); });
+      canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      });
+      canvas.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+      init();
+    })();
   </script>
 </body>
 </html>
